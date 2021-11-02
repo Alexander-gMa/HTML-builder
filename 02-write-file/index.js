@@ -1,5 +1,6 @@
 isTrue = true;
 const fs = require('fs')
+// Процесс это глобальный объект
 const process = require('process');
 const readline = require('readline');
 let base = '' ;
@@ -35,7 +36,6 @@ const steps = {
     }
     if (correctText === 'exit') { return steps.unCorrectText(); }
     
-    return steps.end();
   },
   unCorrectText: async () => {
     console.log(`Ввод закончен!`);
@@ -59,10 +59,10 @@ const steps = {
 // Start the program by running the first step.
 steps.start();
 
-// весло через C + ctrl , не получается через process.on(exit)
-process.stdin.on("keypress", function(chunk, key) {
+// весло через C + ctrl , не получается через process.on(exit) 
+process.stdin.on("keypress", function(e, key) {
   if(key && key.name === "c" && key.ctrl) {
-    console.log("Ввод закончен!")
+    console.log("Ввод закончен! Вы нажали ctrl + c")
     steps.end();
   }
 });
