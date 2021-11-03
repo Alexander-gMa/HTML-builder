@@ -19,32 +19,3 @@ fs.readdir(testFolder,{withFileTypes:true}, (err, files) => {
     }
   });
 })
-
-
-// const {
-//   promises: { stat, readdir },
-// } = require("fs");
-// const path = require("path");
-
-// const testFolder = path.join(__dirname, "secret-folder");
-
-// async function doSomething() {
-//   const dirEntries = await readdir(testFolder, { withFileTypes: true });
-//   const files = dirEntries.filter((entry) => entry.isFile());
-
-//   files.forEach(async (file) => {
-//     const nameFile = file.name;
-//     const extFile = path.extname(nameFile);
-
-//     const el = await stat(path.join(testFolder, nameFile));
-//     console.log(
-//       [
-//         nameFile.substr(0, nameFile.length - extFile.length),
-//         extFile.substr(1),
-//         `${el.size / 1024}kb`,
-//       ].join(" - ")
-//     );
-//   });
-// }
-
-// doSomething();
