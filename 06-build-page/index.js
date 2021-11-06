@@ -3,8 +3,13 @@ const path = require('path');
 
 const base = '';
 const src = path.join(__dirname, "styles");
+const mkDir = path.join(__dirname, "project-dist");
 
-fs.mkdir(path.join("06-build-page/project-dist"), err => {
+const asdasd = path.join(src, "about.css");
+console.log(asdasd)
+
+
+fs.mkdir(path.join(mkDir), err => {
     if (err) return
 });
 
@@ -17,19 +22,29 @@ readableHTML.pipe(writeableHTML);
 ///////////////////////////////////////////////////////////////////////////////////
 
 fs.readFile("06-build-page/project-dist/index.html", "utf8", (err, contentMain) => {
-
     fs.readdir("06-build-page/components", "utf8", (err, el) => {
-        if (err) throw err;
-        el.forEach((el) => {
-            const extTitleName = path.extname(el);
-            const titleName = el.substr(0, el.length - extTitleName.length)
-            fs.readFile(`06-build-page/components/${el}`, "utf8", (err, contentCopy) => {
-                contentMain = contentMain.replace(`{{${titleName}}}`, contentCopy);
-                fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err, contentMain) => {
-                    if (err) throw err;
-                });
-            })
-        });
+        if (!err || err) {
+            el.forEach((el) => {
+                const extTitleName = path.extname(el);
+                const titleName = el.substr(0, el.length - extTitleName.length)
+                fs.readFile(`06-build-page/components/${el}`, "utf8", (err, contentCopy) => {
+                    contentMain = contentMain.replace(`{{${titleName}}}`, contentCopy);
+                    fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {
+                        if (err) {
+                            fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {});
+                        }
+                        if(el === "footer.html"){
+                            contentMainFooter = contentMain.replace("{{header}}", contentCopy);
+                            fs.writeFile("06-build-page/project-dist/index.html", contentMainFooter, 'utf8', (err) => {
+                                if (err) {
+                                    fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {});
+                                }
+                            });
+                        }
+                    });
+                })
+            });
+        }
     })
 });
 
@@ -58,7 +73,7 @@ fs.readdir(src, { withFileTypes: true }, (err, files) => {
     })
 });
 
-// ///////////////////////////////////////////////////////////////
+// // ///////////////////////////////////////////////////////////////
 
 const assetsMain = path.join(__dirname, "assets");
 const assetsCopy = path.join(__dirname, "project-dist/assets");
@@ -78,7 +93,7 @@ fs.mkdir("06-build-page/project-dist/assets", { recursive: true }, (err, files) 
                         const copyWeg = path.join(assetsCopy, `${file.name}/${content.name}`);
                         const mainWeg = path.join(assetsMain, `${file.name}/${content.name}`);
                         fs.copyFile(mainWeg, copyWeg, (err, files) => {
-                            if (err) throw err;
+                            if (err) return;
                         })
                     }
                 })
