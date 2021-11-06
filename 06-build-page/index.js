@@ -7,10 +7,17 @@ const mkDir = path.join(__dirname, "project-dist");
 
 const asdasd = path.join(src, "about.css");
 
-
+fs.readFile("06-build-page", "utf8", (err) => {
+    if (!err) {
+        fs.rm(path.join(mkDir), err => {
+            if (err) return
+        });
+    }
+})
 fs.mkdir(path.join(mkDir), err => {
     if (err) return
 });
+
 
 let readableHTML = fs.createReadStream("06-build-page/template.html", "utf8");
 
@@ -30,13 +37,13 @@ fs.readFile("06-build-page/project-dist/index.html", "utf8", (err, contentMain) 
                     contentMain = contentMain.replace(`{{${titleName}}}`, contentCopy);
                     fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {
                         if (err) {
-                            fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {});
+                            fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => { });
                         }
-                        if(el === "footer.html"){
+                        if (el === "footer.html") {
                             contentMainFooter = contentMain.replace("{{header}}", contentCopy);
                             fs.writeFile("06-build-page/project-dist/index.html", contentMainFooter, 'utf8', (err) => {
                                 if (err) {
-                                    fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {});
+                                    fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => { });
                                 }
                             });
                         }
