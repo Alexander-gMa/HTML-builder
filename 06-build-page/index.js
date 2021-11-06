@@ -6,7 +6,6 @@ const src = path.join(__dirname, "styles");
 const mkDir = path.join(__dirname, "project-dist");
 
 const asdasd = path.join(src, "about.css");
-console.log(asdasd)
 
 
 fs.mkdir(path.join(mkDir), err => {
