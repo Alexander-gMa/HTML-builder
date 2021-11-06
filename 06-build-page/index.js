@@ -7,13 +7,10 @@ const mkDir = path.join(__dirname, "project-dist");
 
 const asdasd = path.join(src, "about.css");
 
-fs.readFile("06-build-page", "utf8", (err) => {
-    if (!err) {
-        fs.rm(path.join(mkDir), err => {
-            if (err) return
-        });
-    }
-})
+fs.rm(path.join(mkDir), err => {
+    if (err) return
+});
+
 fs.mkdir(path.join(mkDir), err => {
     if (err) return
 });
@@ -83,27 +80,32 @@ fs.readdir(src, { withFileTypes: true }, (err, files) => {
 
 const assetsMain = path.join(__dirname, "assets");
 const assetsCopy = path.join(__dirname, "project-dist/assets");
-fs.mkdir("06-build-page/project-dist/assets", { recursive: true }, (err, files) => {
-    if (err) throw err;
-    fs.readdir(assetsMain, { withFileTypes: true }, (err, files) => {
-        if (err) throw err;
-        files.forEach((file) => {
-            const assetsCopy = path.join(__dirname, "project-dist/assets");
-            fs.mkdir(path.join(assetsCopy, file.name), { recursive: true }, (err, elements) => {
+fs.rm("06-build-page/project-dist/assets",{ recursive: true }, err => {
+    if (!err || err) {
+        fs.mkdir("06-build-page/project-dist/assets", { recursive: true }, (err, files) => {
+            if (err) throw err;
+            fs.readdir(assetsMain, { withFileTypes: true }, (err, files) => {
                 if (err) throw err;
-            })
-            fs.readdir(path.join(assetsMain, file.name), { withFileTypes: true }, (err, content) => {
-                if (err) throw err;
-                content.forEach((content) => {
-                    if (content.isFile()) {
-                        const copyWeg = path.join(assetsCopy, `${file.name}/${content.name}`);
-                        const mainWeg = path.join(assetsMain, `${file.name}/${content.name}`);
-                        fs.copyFile(mainWeg, copyWeg, (err, files) => {
-                            if (err) return;
+                files.forEach((file) => {
+                    const assetsCopy = path.join(__dirname, "project-dist/assets");
+                    fs.mkdir(path.join(assetsCopy, file.name), { recursive: true }, (err, elements) => {
+                        if (err) throw err;
+                    })
+                    fs.readdir(path.join(assetsMain, file.name), { withFileTypes: true }, (err, content) => {
+                        if (err) throw err;
+                        content.forEach((content) => {
+                            if (content.isFile()) {
+                                const copyWeg = path.join(assetsCopy, `${file.name}/${content.name}`);
+                                const mainWeg = path.join(assetsMain, `${file.name}/${content.name}`);
+                                fs.copyFile(mainWeg, copyWeg, (err, files) => {
+                                    if (err) return;
+                                })
+                            }
                         })
-                    }
+                    })
                 })
-            })
-        })
-    });
+            });
+        });
+    }
 });
+
