@@ -1,111 +1,93 @@
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
 
 const base = '';
-const src = path.join(__dirname, "styles");
+const sccStyles = path.join(__dirname, "styles");
 const mkDir = path.join(__dirname, "project-dist");
 
-const asdasd = path.join(src, "about.css");
-
-fs.rm(path.join(mkDir), err => {
-    if (err) return
-});
-
-fs.mkdir(path.join(mkDir), err => {
-    if (err) return
-});
+const mainIndex = path.join(mkDir, "index.html");
 
 
-let readableHTML = fs.createReadStream("06-build-page/template.html", "utf8");
+const removeDir = async (src) => {
+    try {
+        await fs.rm(src, { recursive: true });
+    }
+    catch (err) {}
+    await createDir(src);
+};
 
-let writeableHTML = fs.createWriteStream("06-build-page/project-dist/index.html");
+function createDir(src) {
+    return fs.mkdir(src, { recursive: true });
+}
 
-readableHTML.pipe(writeableHTML);
+function readFile(src) {
+    return fs.readFile(src, "utf-8");
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-fs.readFile("06-build-page/project-dist/index.html", "utf8", (err, contentMain) => {
-    fs.readdir("06-build-page/components", "utf8", (err, el) => {
-        if (!err || err) {
-            el.forEach((el) => {
-                const extTitleName = path.extname(el);
-                const titleName = el.substr(0, el.length - extTitleName.length)
-                fs.readFile(`06-build-page/components/${el}`, "utf8", (err, contentCopy) => {
-                    contentMain = contentMain.replace(`{{${titleName}}}`, contentCopy);
-                    fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => {
-                        if (err) {
-                            fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => { });
-                        }
-                        if (el === "footer.html") {
-                            contentMainFooter = contentMain.replace("{{header}}", contentCopy);
-                            fs.writeFile("06-build-page/project-dist/index.html", contentMainFooter, 'utf8', (err) => {
-                                if (err) {
-                                    fs.writeFile("06-build-page/project-dist/index.html", contentMain, 'utf8', (err) => { });
-                                }
-                            });
-                        }
-                    });
-                })
+const components = path.join(__dirname, "components");
+
+const createHtmlFile = async () => {
+    const compContent = await fs.readdir(components);
+    const compFilesinIndex = await compContent.reduce(async (result, el) => {
+        const extTitleName = path.extname(el);
+        const titleName = el.substr(0, el.length - extTitleName.length)
+        const tileOfContent = await readFile(path.join(components,el));
+        const newResult = await result;
+        return newResult.replace(`{{${titleName}}}`, tileOfContent);
+    },
+    await readFile(mainIndex));
+    await fs.writeFile(mainIndex, compFilesinIndex, 'utf8');
+};
+    /////////////////////////////////////////////////////////////////
+
+    const createCSSBundle = async () => {
+        await fs.writeFile(path.join(mkDir, 'style.css'), base);
+        const files = await fs.readdir(sccStyles, { withFileTypes: true });
+        files
+            .filter((file) => {
+                return file.isFile() && path.extname(file.name) === '.css';
+            })
+            .forEach(async (file) => {
+                let content = await readFile(`${sccStyles}/${file.name}`);
+                await fs.appendFile(`${mkDir}/style.css`, content);
             });
-        }
-    })
-});
+    };
 
-/////////////////////////////////////////////////////////////////
+    // // ///////////////////////////////////////////////////////////////
 
-fs.writeFile(`06-build-page/project-dist/style.css`, base, (err) => {
-    if (err) {
-        console.error(err)
-    }
-});
+    const assetsMain = path.join(__dirname, "assets"); 
+    const assetsCopy = path.join(mkDir, "assets");  
 
-fs.readdir(src, { withFileTypes: true }, (err, files) => {
-    if (err) throw err;
-    files.forEach((file) => {
-        if (file.isFile()) {
-            if (path.extname(file.name) === ".css") {
-                fs.readFile(`${src}/${file.name}`, "utf8", (err, content) => {
-                    if (err) throw err;
-                    fs.appendFile("06-build-page/project-dist/style.css", content, (err, files) => {
-                        if (err) throw err;
-                    })
-                })
-
-            }
-        }
-    })
-});
-
-// // ///////////////////////////////////////////////////////////////
-
-const assetsMain = path.join(__dirname, "assets");
-const assetsCopy = path.join(__dirname, "project-dist/assets");
-fs.rm("06-build-page/project-dist/assets",{ recursive: true }, err => {
-    if (!err || err) {
-        fs.mkdir("06-build-page/project-dist/assets", { recursive: true }, (err, files) => {
-            if (err) throw err;
-            fs.readdir(assetsMain, { withFileTypes: true }, (err, files) => {
-                if (err) throw err;
-                files.forEach((file) => {
-                    const assetsCopy = path.join(__dirname, "project-dist/assets");
-                    fs.mkdir(path.join(assetsCopy, file.name), { recursive: true }, (err, elements) => {
-                        if (err) throw err;
-                    })
-                    fs.readdir(path.join(assetsMain, file.name), { withFileTypes: true }, (err, content) => {
-                        if (err) throw err;
-                        content.forEach((content) => {
-                            if (content.isFile()) {
-                                const copyWeg = path.join(assetsCopy, `${file.name}/${content.name}`);
-                                const mainWeg = path.join(assetsMain, `${file.name}/${content.name}`);
-                                fs.copyFile(mainWeg, copyWeg, (err, files) => {
-                                    if (err) return;
-                                })
-                            }
-                        })
-                    })
-                })
+    async function copyAssets() {
+        await fs.mkdir(assetsCopy, { recursive: true })
+        const assetsContent = await fs.readdir(assetsMain, { withFileTypes: true });
+            assetsContent.forEach(async (file) => {
+            await fs.mkdir(path.join(assetsCopy, file.name),{ recursive: true });
+            const content = await fs.readdir(path.join(assetsMain, file.name),{ withFileTypes: true });
+            content
+            .filter((file) => {
+                return file.isFile();
+            })
+            .forEach(async (content) => {
+                const mainWeg = path.join(assetsMain, `${file.name}/${content.name}`);
+                const copyWeg = path.join(assetsCopy, `${file.name}/${content.name}`);
+                await fs.copyFile(mainWeg, copyWeg);
             });
         });
     }
-});
+
+    async function init() {
+        await removeDir(mkDir);
+        await fs.copyFile(path.join(__dirname, 'template.html'), mainIndex);
+        await createHtmlFile();
+    
+        await createCSSBundle();
+    
+        await copyAssets();
+    }
+    
+    init();
+
 

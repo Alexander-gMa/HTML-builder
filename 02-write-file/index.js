@@ -63,6 +63,7 @@ steps.start();
 process.stdin.on("keypress", function(e, key) {
   if(key && key.name === "c" && key.ctrl) {
     console.log("Ввод закончен! Вы нажали ctrl + c")
+    
     steps.end();
   }
 });
