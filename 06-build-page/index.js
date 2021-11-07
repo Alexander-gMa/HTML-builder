@@ -1,4 +1,4 @@
-const fs = require('fs/promises');
+const { promises: fs } = require ('fs')
 const path = require('path');
 
 const base = '';
@@ -12,7 +12,7 @@ const removeDir = async (src) => {
     try {
         await fs.rm(src, { recursive: true });
     }
-    catch (err) {}
+    catch (err) { }
     await createDir(src);
 };
 
@@ -33,40 +33,40 @@ const createHtmlFile = async () => {
     const compFilesinIndex = await compContent.reduce(async (result, el) => {
         const extTitleName = path.extname(el);
         const titleName = el.substr(0, el.length - extTitleName.length)
-        const tileOfContent = await readFile(path.join(components,el));
+        const tileOfContent = await readFile(path.join(components, el));
         const newResult = await result;
         return newResult.replace(`{{${titleName}}}`, tileOfContent);
     },
-    await readFile(mainIndex));
+        await readFile(mainIndex));
     await fs.writeFile(mainIndex, compFilesinIndex, 'utf8');
 };
-    /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
-    const createCSSBundle = async () => {
-        await fs.writeFile(path.join(mkDir, 'style.css'), base);
-        const files = await fs.readdir(sccStyles, { withFileTypes: true });
-        files
-            .filter((file) => {
-                return file.isFile() && path.extname(file.name) === '.css';
-            })
-            .forEach(async (file) => {
-                let content = await readFile(`${sccStyles}/${file.name}`);
-                await fs.appendFile(`${mkDir}/style.css`, content);
-            });
-    };
+const createCSSBundle = async () => {
+    await fs.writeFile(path.join(mkDir, 'style.css'), base);
+    const files = await fs.readdir(sccStyles, { withFileTypes: true });
+    files
+        .filter((file) => {
+            return file.isFile() && path.extname(file.name) === '.css';
+        })
+        .forEach(async (file) => {
+            let content = await readFile(`${sccStyles}/${file.name}`);
+            await fs.appendFile(`${mkDir}/style.css`, content);
+        });
+};
 
-    // // ///////////////////////////////////////////////////////////////
+// // ///////////////////////////////////////////////////////////////
 
-    const assetsMain = path.join(__dirname, "assets"); 
-    const assetsCopy = path.join(mkDir, "assets");  
+const assetsMain = path.join(__dirname, "assets");
+const assetsCopy = path.join(mkDir, "assets");
 
-    async function copyAssets() {
-        await fs.mkdir(assetsCopy, { recursive: true })
-        const assetsContent = await fs.readdir(assetsMain, { withFileTypes: true });
-            assetsContent.forEach(async (file) => {
-            await fs.mkdir(path.join(assetsCopy, file.name),{ recursive: true });
-            const content = await fs.readdir(path.join(assetsMain, file.name),{ withFileTypes: true });
-            content
+async function copyAssets() {
+    await fs.mkdir(assetsCopy, { recursive: true })
+    const assetsContent = await fs.readdir(assetsMain, { withFileTypes: true });
+    assetsContent.forEach(async (file) => {
+        await fs.mkdir(path.join(assetsCopy, file.name), { recursive: true });
+        const content = await fs.readdir(path.join(assetsMain, file.name), { withFileTypes: true });
+        content
             .filter((file) => {
                 return file.isFile();
             })
@@ -75,19 +75,17 @@ const createHtmlFile = async () => {
                 const copyWeg = path.join(assetsCopy, `${file.name}/${content.name}`);
                 await fs.copyFile(mainWeg, copyWeg);
             });
-        });
-    }
+    });
+}
 
-    async function init() {
-        await removeDir(mkDir);
-        await fs.copyFile(path.join(__dirname, 'template.html'), mainIndex);
-        await createHtmlFile();
-    
-        await createCSSBundle();
-    
-        await copyAssets();
-    }
-    
-    init();
+async function init() {
+    await removeDir(mkDir);
+    await fs.copyFile(path.join(__dirname, 'template.html'), mainIndex);
+    await createHtmlFile();
+    await createCSSBundle();
+    await copyAssets();
+}
+
+init();
 
 
